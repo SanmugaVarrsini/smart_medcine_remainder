@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0B6E6E">
+  <title>MedMinder - Medicine reminders and emergency help</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="top">
+    <div>
+      <p id="greeting" class="greeting">Hello</p>
+      <p id="today-date" class="date"></p>
+    </div>
+    <p id="clock" class="clock" aria-label="Current time">--:--</p>
+  </header>
+
+  <button id="enable-alarms" class="banner" type="button" hidden>
+    Tap here to turn on alarm sound and notifications
+  </button>
+
+  <nav class="tabs" role="tablist" aria-label="Sections">
+    <button role="tab" type="button" data-tab="today" aria-selected="true">Today</button>
+    <button role="tab" type="button" data-tab="medicines" aria-selected="false">Medicines</button>
+    <button role="tab" type="button" data-tab="contacts" aria-selected="false">Contacts</button>
+    <button role="tab" type="button" data-tab="info" aria-selected="false">My info</button>
+  </nav>
+
+  <main>
+    <!-- TODAY -->
+    <section id="tab-today" class="panel">
+      <div id="hero" class="hero"></div>
+      <h2>Today's doses</h2>
+      <ul id="timeline" class="timeline"></ul>
+      <h2>Last 7 days</h2>
+      <div id="week" class="week"></div>
+    </section>
+
+    <!-- MEDICINES -->
+    <section id="tab-medicines" class="panel" hidden>
+      <div class="panel-head">
+        <h2>Your medicines</h2>
+        <button id="add-med" class="btn primary" type="button">Add medicine</button>
+      </div>
+      <div id="med-list" class="cards"></div>
+    </section>
+
+    <!-- CONTACTS -->
+    <section id="tab-contacts" class="panel" hidden>
+      <div class="panel-head">
+        <h2>Doctors and family</h2>
+        <button id="add-contact" class="btn primary" type="button">Add contact</button>
+      </div>
+      <div id="contact-list" class="cards"></div>
+    </section>
+
+    <!-- MY INFO -->
+    <section id="tab-info" class="panel" hidden>
+      <h2>My information</h2>
+      <p class="hint">This is shown on the emergency screen and sent with the alert message.</p>
+      <form id="profile-form" class="card form">
+        <label for="p-name">Full name</label>
+        <input id="p-name" type="text" autocomplete="name">
+
+        <label for="p-blood">Blood group</label>
+        <select id="p-blood">
+          <option value="">Not set</option>
+          <option>A+</option><option>A-</option>
+          <option>B+</option><option>B-</option>
+          <option>AB+</option><option>AB-</option>
+          <option>O+</option><option>O-</option>
+        </select>
+
+        <label for="p-allergies">Allergies</label>
+        <input id="p-allergies" type="text" placeholder="For example: penicillin">
+
+        <label for="p-conditions">Health conditions</label>
+        <input id="p-conditions" type="text" placeholder="For example: diabetes, high blood pressure">
+
+        <label for="p-emergency">Emergency number to call</label>
+        <input id="p-emergency" type="tel" inputmode="tel" placeholder="112">
+
+        <label for="p-snooze">Snooze for</label>
+        <select id="p-snooze">
+          <option value="5">5 minutes</option>
+          <option value="10">10 minutes</option>
+          <option value="15">15 minutes</option>
+        </select>
+
+        <button class="btn primary" type="submit">Save my information</button>
+        <p id="profile-saved" class="saved" hidden>Saved</p>
+      </form>
+
+      <div class="card">
+        <h3>Alarm check</h3>
+        <p class="hint">Play a test alarm to make sure the sound and voice work on this device.</p>
+        <button id="test-alarm" class="btn ghost" type="button">Test the alarm</button>
+      </div>
+
+      <div class="card">
+        <h3>Alarms that work when the app is closed</h3>
+        <p class="hint">Download your medicine times as a calendar file. Open it and choose Add. Your phone's own calendar will then ring every day, even when this app is closed. After you change medicines, download it again and remove the old events.</p>
+        <button id="export-ics" class="btn primary" type="button">Add alarms to my calendar</button>
+      </div>
+
+      <div class="card" id="install-card">
+        <h3>Install on this phone</h3>
+        <p id="install-hint" class="hint">Installing puts MedMinder on the home screen and lets it open without internet.</p>
+        <button id="install-app" class="btn ghost" type="button" hidden>Install MedMinder</button>
+      </div>
+
+      <div class="card">
+        <h3>Good to know</h3>
+        <p class="hint">The in-app alarm rings while the app is open. Everything you enter stays on this device.</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Emergency bar -->
+  <div class="sos-bar">
+    <button id="sos" class="btn sos" type="button">Emergency help</button>
+  </div>
+
+  <!-- Medicine dialog -->
+  <dialog id="med-dialog" aria-labelledby="med-title">
+    <form id="med-form" class="dlg-body form" novalidate>
+      <h2 id="med-title">Add medicine</h2>
+
+      <label for="m-name">Medicine name</label>
+      <input id="m-name" type="text" required placeholder="For example: Metformin">
+
+      <label for="m-dose">Dose</label>
+      <input id="m-dose" type="text" placeholder="For example: 500 mg, 1 tablet">
+
+      <label for="m-time">Times each day</label>
+      <div class="time-row">
+        <input id="m-time" type="time" value="08:00">
+        <button id="add-time" class="btn ghost" type="button">Add time</button>
+      </div>
+      <ul id="time-chips" class="chips"></ul>
+
+      <label for="m-food">When to take it</label>
+      <select id="m-food">
+        <option>Before food</option>
+        <option selected>After food</option>
+        <option>With food</option>
+        <option>Any time</option>
+      </select>
+
+      <label for="m-notes">Notes</label>
+      <textarea id="m-notes" rows="2" placeholder="For example: white round tablet, keep in fridge"></textarea>
+
+      <fieldset class="swatches">
+        <legend>Colour</legend>
+        <label><input type="radio" name="color" value="#0B6E6E" checked><span style="--c:#0B6E6E"></span><i class="sr">Teal</i></label>
+        <label><input type="radio" name="color" value="#3E5BC9"><span style="--c:#3E5BC9"></span><i class="sr">Blue</i></label>
+        <label><input type="radio" name="color" value="#B4531B"><span style="--c:#B4531B"></span><i class="sr">Orange</i></label>
+        <label><input type="radio" name="color" value="#7A3E9D"><span style="--c:#7A3E9D"></span><i class="sr">Purple</i></label>
+        <label><input type="radio" name="color" value="#B3265F"><span style="--c:#B3265F"></span><i class="sr">Pink</i></label>
+      </fieldset>
+
+      <p id="med-error" class="error" role="alert" hidden></p>
+      <div class="dlg-actions">
+        <button class="btn primary" type="submit">Save medicine</button>
+        <button class="btn ghost" type="button" data-close="med-dialog">Cancel</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Contact dialog -->
+  <dialog id="contact-dialog" aria-labelledby="contact-title">
+    <form id="contact-form" class="dlg-body form" novalidate>
+      <h2 id="contact-title">Add contact</h2>
+
+      <label for="c-name">Name</label>
+      <input id="c-name" type="text" required placeholder="For example: Dr. Sharma">
+
+      <label for="c-role">Who is this?</label>
+      <select id="c-role">
+        <option>Doctor</option>
+        <option>Family</option>
+        <option>Caregiver</option>
+        <option>Neighbour</option>
+      </select>
+
+      <label for="c-phone">Phone number</label>
+      <input id="c-phone" type="tel" inputmode="tel" required placeholder="+91 98765 43210">
+
+      <label for="c-note">Details</label>
+      <input id="c-note" type="text" placeholder="For example: heart specialist, my son">
+
+      <p id="contact-error" class="error" role="alert" hidden></p>
+      <div class="dlg-actions">
+        <button class="btn primary" type="submit">Save contact</button>
+        <button class="btn ghost" type="button" data-close="contact-dialog">Cancel</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Alarm dialog -->
+  <dialog id="alarm-dialog" aria-labelledby="alarm-title">
+    <div class="dlg-body alarm">
+      <div class="pulse" aria-hidden="true">⏰</div>
+      <h2 id="alarm-title">Time for your medicine</h2>
+      <ul id="alarm-list" class="alarm-list"></ul>
+      <button id="snooze" class="btn ghost" type="button">Remind me again later</button>
+    </div>
+  </dialog>
+
+  <!-- Emergency dialog -->
+  <dialog id="sos-dialog" aria-labelledby="sos-title">
+    <div class="dlg-body">
+      <h2 id="sos-title">Get help now</h2>
+      <p id="sos-status" class="hint"></p>
+      <div id="sos-actions"></div>
+      <div id="sos-info" class="card info"></div>
+      <button class="btn ghost" type="button" data-close="sos-dialog">Close</button>
+    </div>
+  </dialog>
+
+  <script src="script.js"></script>
+</body>
+</html>
